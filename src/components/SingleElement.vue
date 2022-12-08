@@ -33,7 +33,11 @@ import { v4 } from 'uuid';
 
                 // console.log(this.element.x);
                 // hey elementClick happened with element
-                this.$emit('elementClick', this.element);
+                this.$emit('elementClick', {
+                    x: this.element.x,
+                    y: this.element.y,
+                    marked: this.isMarked,
+                });
             },
         },
     }

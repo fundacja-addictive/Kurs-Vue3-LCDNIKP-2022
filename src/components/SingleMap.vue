@@ -42,6 +42,7 @@ export default {
         },
         elementClicked: function (element) {
             console.log(element);
+            this.$emit('elementClicked', element);
         },
     }
 };
