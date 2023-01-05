@@ -108,7 +108,7 @@ export default {
             var curr = this.findCurrentShip();
 
             if (!curr)
-                return alert("Gratulacje!");
+                return this.$emit('allShipsPicked', this.ships);
 
             if (curr.length == shipArray.length) {
                 curr.state = 'picked';

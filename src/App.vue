@@ -3,7 +3,8 @@
     <single-map 
       class="map"
       v-on:elementClicked="elementClicked"></single-map>
-    <ship-picker ref="shipPicker"></ship-picker>
+    <ship-picker ref="shipPicker"
+      v-on:allShipsPicked="allShipsPicked($event)"></ship-picker>
     <br/>
     <br/>
   </div>
@@ -14,13 +15,23 @@ import SingleMap from './components/SingleMap.vue';
 import ShipPickerVue from './components/ShipPicker.vue';
 import { io } from 'socket.io-client';
 
+import Swal from 'sweetalert2';
+
 const socket = io("localhost:8082");
+
+socket.on('playerReady', function () {
+    console.log('EEE');
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      title: 'Player ready!',
+    })
+});
 
 socket.on('connection', function () {
     console.log('Connected to socket');
 
-    
-    socket.emit('hello', 'world');
+    socket.emit('hello', 'world');    
 })
 
 socket.on('disconnect', function () {
@@ -45,6 +56,9 @@ export default {
     elementClicked: function (element) {
       socket.emit('clicked', element);
       this.$refs.shipPicker.elementClicked(element);
+    },
+    allShipsPicked: function (data) {
+      socket.emit('allShipsPicked', data);
     }
   },
 }
