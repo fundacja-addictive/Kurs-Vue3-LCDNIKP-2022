@@ -12,6 +12,20 @@
 <script>
 import SingleMap from './components/SingleMap.vue';
 import ShipPickerVue from './components/ShipPicker.vue';
+import { io } from 'socket.io-client';
+
+const socket = io("localhost:8082");
+
+socket.on('connection', function () {
+    console.log('Connected to socket');
+
+    
+    socket.emit('hello', 'world');
+})
+
+socket.on('disconnect', function () {
+    console.log('Disconnected');
+});
 
 export default {
   name: 'App',
@@ -29,7 +43,7 @@ export default {
   },
   methods: {
     elementClicked: function (element) {
-      // console.log("Clicked:", element);
+      socket.emit('clicked', element);
       this.$refs.shipPicker.elementClicked(element);
     }
   },
