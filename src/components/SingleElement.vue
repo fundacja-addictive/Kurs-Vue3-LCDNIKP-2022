@@ -1,5 +1,5 @@
 <template>
-    <button :class="'btn ' + (isMarked ? 'btn-marked' : '')" v-on:click="click()">{{ element.x + element.y }}</button>
+    <button :disabled="block" :class="'btn ' + (isMarked ? 'btn-marked' : '')" v-on:click="click()">{{ element.x + element.y }}</button>
 </template>
 
 <script>
@@ -14,6 +14,7 @@ import { v4 } from 'uuid';
         },
         props: {
             element: null,
+            block: null,
         },
         mounted () {
             console.log('Mounted!');

@@ -1,13 +1,17 @@
 <template>
-  <div class="app">
-    <single-map 
-      class="map"
-      v-on:elementClicked="elementClicked"></single-map>
-    <ship-picker ref="shipPicker"
-      v-on:allShipsPicked="allShipsPicked($event)"></ship-picker>
-    <br/>
-    <br/>
-  </div>
+	<div class="app">
+		<single-map 
+			class="map"
+			v-on:elementClicked="elementClicked"
+			:blockPicking="blockPicking"
+		></single-map>
+		<ship-picker 
+			ref="shipPicker"
+			v-on:allShipsPicked="allShipsPicked($event)"
+		></ship-picker>
+		<br/>
+		<br/>
+	</div>
 </template>
 
 <script>
@@ -17,50 +21,55 @@ import { io } from 'socket.io-client';
 
 import Swal from 'sweetalert2';
 
-const socket = io("localhost:8082");
-
-socket.on('playerReady', function () {
-    console.log('EEE');
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      title: 'Player ready!',
-    })
-});
-
-socket.on('connection', function () {
-    console.log('Connected to socket');
-
-    socket.emit('hello', 'world');    
-})
-
-socket.on('disconnect', function () {
-    console.log('Disconnected');
-});
-
 export default {
-  name: 'App',
-  components: {
-    SingleMap: SingleMap,
-    ShipPicker: ShipPickerVue,
-  },
-  data: function () {
-    return {
-      name: 'Karol',
-    };
-  },
-  mounted: function () {
-    // console.log(this.$refs.shipPicker);
-  },
-  methods: {
-    elementClicked: function (element) {
-      socket.emit('clicked', element);
-      this.$refs.shipPicker.elementClicked(element);
-    },
-    allShipsPicked: function (data) {
-      socket.emit('allShipsPicked', data);
-    }
-  },
+	name: 'App',
+	components: {
+		SingleMap: SingleMap,
+		ShipPicker: ShipPickerVue,
+	},
+	data: function () {
+		return {
+			name: 'Karol',
+			socket: null,
+			blockPicking: false,
+		};
+	},
+	mounted: function () {
+		this.socket = io("localhost:8082");
+
+		this.socket.on('playerReady', function () {
+			console.log('EEE');
+			Swal.fire({
+				toast: true,
+				position: 'top-end',
+				title: 'Player ready!',
+			})
+		});
+
+		this.socket.on('blockPicking', () => {
+			this.blockPicking = true;
+		});
+
+		this.socket.on('connection', () => {
+			console.log('Connected to socket');
+
+			this.socket.emit('hello', 'world');    
+		})
+
+		this.socket.on('disconnect', function () {
+			console.log('Disconnected');
+		});
+
+	},
+	methods: {
+		elementClicked: function (element) {
+			this.socket.emit('clicked', element);
+			this.$refs.shipPicker.elementClicked(element);
+		},
+		allShipsPicked: function (data) {
+			this.socket.emit('allShipsPicked', data);
+		}
+	},
 }
 
 </script>

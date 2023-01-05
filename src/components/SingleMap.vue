@@ -6,6 +6,7 @@
             class="map-element" 
             :element="coordinate"
             v-on:elementClick="elementClicked"
+            :block="blockPicking"
         ></single-element>
     </div>
 </template>
@@ -24,7 +25,7 @@ export default {
         };
     },
     props: {
-
+        blockPicking: null,
     },
     mounted() {
         this.generateCoordinates();
