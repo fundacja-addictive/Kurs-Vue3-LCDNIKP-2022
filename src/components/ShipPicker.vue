@@ -139,9 +139,13 @@ export default {
                         if(direction == 'D')
                             checkY -= 1;
 
+                    console.log(checkX, checkY);
+
                     var found = fieldsToSearch.find((e) => {
                         return e.x == checkX && e.y == checkY;
-                    })
+                    });
+
+                    console.log(found);
 
                     return found;
                 };
@@ -149,7 +153,7 @@ export default {
                 var checkOther = (field /* object */, directions /* array */) => {
                     var found = nodes.find(e => e.x == field.x && e.y == field.y);
                     if (found)
-                        return;
+                        return [];
 
                     nodes.push(field);
 
@@ -157,13 +161,17 @@ export default {
                         var result = findField(fields, field, d);
 
                         if (result) {
-                            if (d == 'U' || d == 'D')
-                                checkOther(result, ["U", "D"]);
-                            if (d == 'L' || d == 'R')
-                                checkOther(result, ["L", "R"]);
-                            return;
+                            if (d == "U" || d == "D") {
+                                return [...checkOther(result, ["U", "D"]), result];
+                            }
+                            if (d == "L" || d == "R")
+                                return [...checkOther(result, ["L", "R"]), result];
+                        } else {
+                            return [];
                         }
                     });
+
+                    return [];
                 };
 
                 if (fields.length > 0)
