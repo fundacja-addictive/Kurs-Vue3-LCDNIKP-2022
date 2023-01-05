@@ -18,10 +18,8 @@ import { v4 } from 'uuid';
         },
         mounted () {
             console.log('Mounted!');
-            // setInterval(() => {
-            //     this.word = this.word + '.';
-            // }, 1000);
-            // this.showLog("Pies ");
+            if (this.element.isMarked)
+                this.isMarked = true;
         },
         methods: {
             showLog: function (text) {

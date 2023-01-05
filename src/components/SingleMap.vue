@@ -26,6 +26,7 @@ export default {
     },
     props: {
         blockPicking: null,
+        overrideCoordinates: null,
     },
     mounted() {
         this.generateCoordinates();
@@ -34,9 +35,16 @@ export default {
         generateCoordinates: function () {
             for (var x = 65; x < 75; x++) {
                 for (var y = 1; y <= 10; y++) {
+                    var override;
+                    if (this.overrideCoordinates)
+                        override = this.overrideCoordinates.find(c => {
+                            return c.x == String.fromCharCode(x) && c.y == y;
+                        });
+
                     this.coordinates.push({
                         x: String.fromCharCode(x),
                         y: y,
+                        isMarked: override ? true : undefined,
                     });
                 }
             }

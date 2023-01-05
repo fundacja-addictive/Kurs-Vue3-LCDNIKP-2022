@@ -1,9 +1,16 @@
 <template>
 	<div class="app">
 		<single-map 
+			v-if="displayBoard"
 			class="map"
 			v-on:elementClicked="elementClicked"
 			:blockPicking="blockPicking"
+		></single-map>
+		<single-map
+			v-if="gameIsOn"
+			class="map small-map"
+			:blockPicking="true"
+			:overrideCoordinates="myPickedNodes"
 		></single-map>
 		<ship-picker 
 			ref="shipPicker"
@@ -32,6 +39,9 @@ export default {
 			name: 'Karol',
 			socket: null,
 			blockPicking: false,
+			gameIsOn: false,
+			myPickedNodes: [],
+			displayBoard: true,
 		};
 	},
 	mounted: function () {
@@ -48,6 +58,16 @@ export default {
 
 		this.socket.on('blockPicking', () => {
 			this.blockPicking = true;
+		});
+
+		this.socket.on('gameIsOn', () => {
+			this.gameIsOn = true;
+
+			this.displayBoard = false;
+
+			this.$nextTick(() => {
+				this.displayBoard = true;
+			});
 		});
 
 		this.socket.on('connection', () => {
@@ -67,6 +87,10 @@ export default {
 			this.$refs.shipPicker.elementClicked(element);
 		},
 		allShipsPicked: function (data) {
+			data.forEach(ship => {
+				this.myPickedNodes.push(...ship.nodes);
+			});
+
 			this.socket.emit('allShipsPicked', data);
 		}
 	},
@@ -90,6 +114,11 @@ export default {
 
 .map {
   width: 500px;
+}
+
+.small-map {
+    width: 50%;
+    margin: 0 auto;
 }
 
 /* .app {
