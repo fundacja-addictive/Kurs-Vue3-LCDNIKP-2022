@@ -123,8 +123,6 @@ export default {
         markedFields: {
             deep: true,
             handler: function (fields) {
-                console.log(fields);
-
                 var nodes = [];
 
                 // U, D, L, R
