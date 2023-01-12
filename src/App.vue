@@ -60,6 +60,44 @@ export default {
 			this.blockPicking = true;
 		});
 
+		this.socket.on('yourTurn', () => {
+			this.blockPicking = false;
+		});
+
+		this.socket.on('hit', (data) => {
+			var coordinates = data.coordinates;
+			Swal.fire({
+				toast: true,
+				title: 'Hit!',
+				showConfirmButton: false,
+				position: 'top-right',
+				timer: 1000,
+			})
+
+			coordinates;
+		});
+
+		this.socket.on('miss', (data) => {
+			var coordinates = data.coordinates;
+			Swal.fire({
+				toast: true,
+				title: 'Miss!',
+				showConfirmButton: false,
+				position: 'top-right',
+				timer: 1000,
+			});
+
+			coordinates;
+		});
+
+		this.socket.on('hitAndDead', () => {
+			Swal.fire({
+				title: 'DEAD SHIP',
+				showConfirmButton: false,
+				timer: 1500,
+			})
+		});
+
 		this.socket.on('gameIsOn', () => {
 			this.gameIsOn = true;
 
@@ -70,11 +108,12 @@ export default {
 			});
 		});
 
-		this.socket.on('connection', () => {
-			console.log('Connected to socket');
-
-			this.socket.emit('hello', 'world');    
-		})
+		// this.socket.on('connect', () => {
+		// 	// Swal.fire({
+		// 	// 	toast: true,
+		// 	// 	text: 'Connected to server',
+		// 	// })
+		// })
 
 		this.socket.on('disconnect', function () {
 			console.log('Disconnected');
@@ -83,8 +122,14 @@ export default {
 	},
 	methods: {
 		elementClicked: function (element) {
-			this.socket.emit('clicked', element);
-			this.$refs.shipPicker.elementClicked(element);
+			if (this.gameIsOn) {
+				this.socket.emit('shoot', {
+					coordinates: element,
+				});
+			} else {
+				this.socket.emit('clicked', element);
+				this.$refs.shipPicker.elementClicked(element);
+			}
 		},
 		allShipsPicked: function (data) {
 			data.forEach(ship => {
