@@ -1,5 +1,5 @@
 <template>
-    <button :disabled="block" :class="'btn ' + (isMarked ? 'btn-marked' : '')" v-on:click="click()">{{ element.x + element.y }}</button>
+    <button :disabled="block" :class="{'btn': true, 'btn-marked': isMarked, 'btn-miss': isMiss, 'btn-dead': isDead, 'btn-hit': isHit }" v-on:click="click()">{{ element.x + element.y }}</button>
 </template>
 
 <script>
@@ -15,6 +15,9 @@ import { v4 } from 'uuid';
         props: {
             element: null,
             block: null,
+            isMiss: null,
+            isHit: null,
+            isDead: null,
         },
         mounted () {
             console.log('Mounted!');
@@ -53,5 +56,17 @@ import { v4 } from 'uuid';
 
     .btn-marked {
         background-color: deepskyblue;
+    }
+    
+    .btn-miss {
+        background-color: gray;
+    }
+
+    .btn-hit {
+        background-color: red;
+    }
+
+    .btn-dead {
+        background-color: black;
     }
 </style>

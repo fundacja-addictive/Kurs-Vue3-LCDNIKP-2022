@@ -7,6 +7,9 @@
             :element="coordinate"
             v-on:elementClick="elementClicked"
             :block="blockPicking"
+            :isMiss="coordinate.isMiss"
+            :isHit="coordinate.isHit"
+            :isDead="coordinate.isDead"
         ></single-element>
     </div>
 </template>
@@ -45,6 +48,9 @@ export default {
                         x: String.fromCharCode(x),
                         y: y,
                         isMarked: override ? true : undefined,
+                        isMiss: false,
+                        isHit: false,
+                        isDead: false,
                     });
                 }
             }
@@ -52,6 +58,15 @@ export default {
         elementClicked: function (element) {
             this.$emit('elementClicked', element);
         },
+        missElement: function (coordinates) {
+            this.coordinates.find(c => c.x == coordinates.x && c.y == coordinates.y).isMiss = true;
+        },
+        hitElement: function (coordinates) {
+            this.coordinates.find(c => c.x == coordinates.x && c.y == coordinates.y).isHit = true;
+        },
+        killElement: function (coordinates) {
+            this.coordinates.find(c => c.x == coordinates.x && c.y == coordinates.y).isDead = true;
+        }
     }
 };
 </script>

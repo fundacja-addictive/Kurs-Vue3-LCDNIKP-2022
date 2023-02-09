@@ -1,16 +1,20 @@
 <template>
 	<div :class="{'app': true, 'win': isWin, 'loss': isLoss}">
+		<!-- This is an active board to click - firstly for setting up your ships, next to shoot your opponent -->
 		<single-map 
 			v-if="displayBoard"
 			class="map"
 			v-on:elementClicked="elementClicked"
 			:blockPicking="blockPicking"
+			ref="currentBoard"
 		></single-map>
+		<!-- the following board is just an overview of your board after the game is started -->
 		<single-map
 			v-if="gameIsOn"
 			class="map small-map"
 			:blockPicking="true"
 			:overrideCoordinates="myPickedNodes"
+			ref="referralBoard"
 		></single-map>
 		<ship-picker 
 			ref="shipPicker"
@@ -44,10 +48,13 @@ export default {
 			displayBoard: true,
 			isWin: false,
 			isLoss: false,
+			mySlotIndex: undefined,
 		};
 	},
 	mounted: function () {
 		this.socket = io("localhost:8082");
+
+		this.socket.on('yourId', id => this.mySlotIndex = id);
 
 		this.socket.on('playerReady', function () {
 			console.log('EEE');
@@ -76,7 +83,10 @@ export default {
 				timer: 1000,
 			})
 
-			coordinates;
+			if (data.hitBy === this.mySlotIndex)
+				this.$refs.currentBoard.hitElement(coordinates);
+			else if (data.hitBy !== undefined)
+				this.$refs.referralBoard.hitElement(coordinates);
 		});
 
 		this.socket.on('miss', (data) => {
@@ -89,15 +99,26 @@ export default {
 				timer: 1000,
 			});
 
-			coordinates;
+			if (data.missBy === this.mySlotIndex)
+				this.$refs.currentBoard.missElement(coordinates);
+			else if (data.missBy !== undefined)
+				this.$refs.referralBoard.missElement(coordinates);
 		});
 
-		this.socket.on('hitAndDead', () => {
+		this.socket.on('hitAndDead', (data) => {
 			Swal.fire({
 				title: 'DEAD SHIP',
+				text: 'Player ' + data.hitBy + ' killed opponent\'s ship ID: ' + data.ship.id,
 				showConfirmButton: false,
 				timer: 1500,
-			})
+			});
+
+			data.ship.nodes.forEach(node => {
+				if (data.hitBy === this.mySlotIndex)
+					this.$refs.currentBoard.killElement(node);
+				else if (data.hitBy !== undefined)
+					this.$refs.referralBoard.killElement(node);
+			});
 		});
 
 		this.socket.on('gameIsOn', () => {
@@ -151,7 +172,7 @@ export default {
 			});
 
 			this.socket.emit('allShipsPicked', data);
-		}
+		},
 	},
 }
 
