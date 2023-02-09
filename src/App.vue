@@ -1,5 +1,5 @@
 <template>
-	<div class="app">
+	<div :class="{'app': true, 'win': isWin, 'loss': isLoss}">
 		<single-map 
 			v-if="displayBoard"
 			class="map"
@@ -42,6 +42,8 @@ export default {
 			gameIsOn: false,
 			myPickedNodes: [],
 			displayBoard: true,
+			isWin: false,
+			isLoss: false,
 		};
 	},
 	mounted: function () {
@@ -108,6 +110,18 @@ export default {
 			});
 		});
 
+		this.socket.on('gameEnd', () => {
+			this.blockPicking = true;
+		});
+
+		this.socket.on('youWin', () => {
+			this.isWin = true;
+		});
+
+		this.socket.on('youLoose', () => {
+			this.isLoss = true;
+		});
+
 		// this.socket.on('connect', () => {
 		// 	// Swal.fire({
 		// 	// 	toast: true,
@@ -170,5 +184,13 @@ export default {
   width: 100%;
   height: 100%;
 } */
+
+.win {
+	background-color: green;
+}
+
+.loss {
+	background-color: red;
+}
 
 </style>
