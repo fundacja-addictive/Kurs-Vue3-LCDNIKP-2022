@@ -52,6 +52,7 @@ import { v4 } from 'uuid';
         border: 1px solid black;
         margin: 1px;
         aspect-ratio: 1 / 1;
+        padding: 0 0;
     }
 
     .btn-marked {

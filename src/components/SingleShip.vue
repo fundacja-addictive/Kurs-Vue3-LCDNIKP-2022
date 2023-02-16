@@ -1,6 +1,5 @@
 <template lang="">
     <div>
-        ID: {{ ship.id }}
         <div
             :class="shipClasses"
             v-for="node in ship.length"
@@ -32,6 +31,9 @@ export default {
       if (this.ship.state == 'picked')
         classes += "pickedShip ";
 
+      if (this.ship.state == 'dead')
+        classes += 'deadShip ';
+
       return classes;
     },
   },
@@ -52,5 +54,9 @@ export default {
 
     .pickedShip {
       background-color: green;
+    }
+
+    .deadShip {
+      background-color: black;
     }
 </style>

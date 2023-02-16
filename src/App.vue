@@ -1,5 +1,13 @@
 <template>
 	<div :class="{'app': true, 'win': isWin, 'loss': isLoss}">
+		<span>Player {{ name }} (Slot {{ mySlotIndex }})</span>
+		<div class="phase">
+			<span v-if="phase == 'planning'">Place your ships</span>
+			<span v-if="phase == 'waiting'">Wait for the other player</span>
+			<span v-if="phase == 'shoot'">Shoot your enemy</span>
+			<span v-if="phase == 'win'">You won!</span>
+			<span v-if="phase == 'defeat'">You loose!</span>
+		</div>
 		<!-- This is an active board to click - firstly for setting up your ships, next to shoot your opponent -->
 		<single-map 
 			v-if="displayBoard"
@@ -8,6 +16,14 @@
 			:blockPicking="blockPicking"
 			ref="currentBoard"
 		></single-map>
+		<ship-picker 
+			ref="shipPicker"
+			v-on:allShipsPicked="allShipsPicked($event)"
+			v-on:shipPicked="shipPicked"
+		></ship-picker>
+
+		<hr class="horizontal">
+
 		<!-- the following board is just an overview of your board after the game is started -->
 		<single-map
 			v-if="gameIsOn"
@@ -16,12 +32,6 @@
 			:overrideCoordinates="myPickedNodes"
 			ref="referralBoard"
 		></single-map>
-		<ship-picker 
-			ref="shipPicker"
-			v-on:allShipsPicked="allShipsPicked($event)"
-		></ship-picker>
-		<br/>
-		<br/>
 	</div>
 </template>
 
@@ -31,6 +41,8 @@ import ShipPickerVue from './components/ShipPicker.vue';
 import { io } from 'socket.io-client';
 
 import Swal from 'sweetalert2';
+
+const WAITING = 'waiting';
 
 export default {
 	name: 'App',
@@ -49,28 +61,44 @@ export default {
 			isWin: false,
 			isLoss: false,
 			mySlotIndex: undefined,
+			phase: 'planning',
 		};
 	},
 	mounted: function () {
+		var names = [
+			"Krzysztof", 
+			"Anna", 
+			"Wojciech", 
+			"Maciej", 
+			"Radosław", 
+			"Karol", 
+			"Zuzanna", 
+			"Marcin", 
+			"Małgorzata",
+			"Katarzyna",
+		];
+		this.name = names[Math.floor(Math.random() * 10)];
+
 		this.socket = io("localhost:8082");
 
 		this.socket.on('yourId', id => this.mySlotIndex = id);
 
-		this.socket.on('playerReady', function () {
-			console.log('EEE');
+		this.socket.on('opponentReady', function () {
 			Swal.fire({
 				toast: true,
 				position: 'top-end',
-				title: 'Player ready!',
-			})
+				title: 'Opponent ready!',
+			});
 		});
 
 		this.socket.on('blockPicking', () => {
 			this.blockPicking = true;
+			this.phase = WAITING;
 		});
 
 		this.socket.on('yourTurn', () => {
 			this.blockPicking = false;
+			this.phase = 'shoot';
 		});
 
 		this.socket.on('hit', (data) => {
@@ -113,6 +141,9 @@ export default {
 				timer: 1500,
 			});
 
+			if (data.hitBy === this.mySlotIndex)
+				this.$refs.shipPicker.killShip(data.ship.id);
+
 			data.ship.nodes.forEach(node => {
 				if (data.hitBy === this.mySlotIndex)
 					this.$refs.currentBoard.killElement(node);
@@ -126,6 +157,8 @@ export default {
 
 			this.displayBoard = false;
 
+			this.$refs.shipPicker.resetShips();
+
 			this.$nextTick(() => {
 				this.displayBoard = true;
 			});
@@ -137,10 +170,12 @@ export default {
 
 		this.socket.on('youWin', () => {
 			this.isWin = true;
+			this.phase = 'win';
 		});
 
 		this.socket.on('youLoose', () => {
 			this.isLoss = true;
+			this.phase = 'defeat';
 		});
 
 		// this.socket.on('connect', () => {
@@ -167,11 +202,18 @@ export default {
 			}
 		},
 		allShipsPicked: function (data) {
+			this.phase = WAITING;
+
 			data.forEach(ship => {
 				this.myPickedNodes.push(...ship.nodes);
 			});
 
 			this.socket.emit('allShipsPicked', data);
+		},
+		shipPicked: function (shipData) {
+			shipData.nodes.forEach(node => {
+				this.$refs.currentBoard.killElement(node);
+			})
 		},
 	},
 }
@@ -179,13 +221,17 @@ export default {
 </script>
 
 <style>
+html, body {
+	overflow: hidden;
+}
+
 #app {
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-  margin-top: 60px;
+  margin-top: 1rem;
 }
 /* 
 .map-row, .map-column {
@@ -193,7 +239,7 @@ export default {
 } */
 
 .map {
-  width: 500px;
+  width: 100%;
 }
 
 .small-map {
@@ -212,6 +258,12 @@ export default {
 
 .loss {
 	background-color: red;
+}
+
+.phase {
+	font-family: 'Franklin Gothic Medium', 'Arial Narrow', Arial, sans-serif;
+	margin-top: 1rem;
+	margin-bottom: 1rem;
 }
 
 </style>

@@ -6,7 +6,7 @@
             class="map-element" 
             :element="coordinate"
             v-on:elementClick="elementClicked"
-            :block="blockPicking"
+            :block="coordinate.isDead || blockPicking"
             :isMiss="coordinate.isMiss"
             :isHit="coordinate.isHit"
             :isDead="coordinate.isDead"
@@ -73,10 +73,8 @@ export default {
 
 <style>
 .map {
-  /* max-width: 100%;
-  max-height: 100%; */
   display: grid;
-  grid-template-columns: repeat(10, auto);
-  grid-template-rows: repeat(10, auto);
+  grid-template-columns: repeat(10, 1fr);
+  grid-template-rows: repeat(10, 1fr);
 }
 </style>

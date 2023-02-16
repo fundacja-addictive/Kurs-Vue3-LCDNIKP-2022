@@ -1,5 +1,5 @@
 <template lang="">
-    <div>
+    <div class="ship-picker">
         <single-ship 
             v-for="ship in ships"
             v-bind:key="ship.id"
@@ -115,9 +115,20 @@ export default {
                 curr.nodes = shipArray;
                 this.markedFields = [];
 
+                this.$emit('shipPicked', curr);
+
                 this.setNextCurrent();
             }
         },  
+        resetShips: function () {
+            this.ships.forEach(ship => {
+                delete ship.nodes;
+                ship.state = 'free';
+            });
+        },  
+        killShip: function (shipId) {
+            this.ships.find(s => s.id == shipId).state = 'dead';
+        },
     },
     watch: {
         markedFields: {
@@ -189,5 +200,11 @@ export default {
 }
 </script>
 <style>
-    
+    .ship-picker {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        margin-top: 1rem;
+        margin-bottom: 1rem;
+    }
 </style>
